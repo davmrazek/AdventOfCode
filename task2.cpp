@@ -9,31 +9,37 @@ long long count_digits_log(long long n) {
 }
 
 
-long long calculate_range(long long start, long long end){
-    // only odd-digits numbers
-    if((count_digits_log(start) == count_digits_log(end)) && (count_digits_log(start) %2 == 1)) {
-        return 0;
+
+// return true if s is equal to some substring repeated >= 2 times
+bool is_invalid_id(const std::string &s) {
+    int n = (int)s.size();
+    if (n < 2) return false; 
+
+    std::vector<int> pi(n, 0);
+    for (int i = 1; i < n; ++i) {
+        int j = pi[i-1];
+        while (j > 0 && s[i] != s[j]) j = pi[j-1];
+        if (s[i] == s[j]) ++j;
+        pi[i] = j;
     }
+
+    int period = n - pi[n-1];
+    return (period < n) && (n % period == 0);
+}
+
+
+long long calculate_range(std::string start, std::string end){
     long long sum = 0;
-    
-    for (size_t i = start; i <= end; i++)
+    long long start_num = std::stoll(start);
+    long long end_num = std::stoll(end);
+
+
+    // looping through each number
+    for (long long i = start_num; i <= end_num; i++)
     {
-        long long digits = count_digits_log(i);
-        if (digits % 2 == 0) {
-            std::string my_string = std::to_string(i);
-            // checking similarity
-            long long midpoint = digits/2;
-            int valid = 1;
-            for (size_t j = 0; j < midpoint; j++)
-            {
-                if (my_string[j] != my_string[j+midpoint])
-                {
-                    valid = 0;
-                }
-            }
-            if(valid){
-                sum += i;
-            }
+        if (is_invalid_id(std::to_string(i)))
+        {
+            sum+= i;
         }
     }
     return sum;
@@ -57,10 +63,8 @@ int main() {
                 std::string end_str = segment.substr(dash_pos + 1);
 
                 
-                long long start = std::stoll(start_str);
-                long long end = std::stoll(end_str);
 
-                long long result = calculate_range(start, end);
+                long long result = calculate_range(start_str, end_str);
                 total+= result;
             }
         }
